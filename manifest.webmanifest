@@ -1,0 +1,15 @@
+{
+  "name": "Planner PMDF — Soldado",
+  "short_name": "Planner PMDF",
+  "description": "Rotina de estudos verticalizada para o concurso de Soldado da PMDF, com ciclo, controle de horas, banco de erros e checklist do TAF.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F4EFE7",
+  "theme_color": "#560E16",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
