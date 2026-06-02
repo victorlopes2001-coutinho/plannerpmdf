@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planner PMDF — Soldado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#560E16">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Planner PMDF">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<style>
+:root{
+  --oxblood:#7A1620; --oxblood-deep:#560E16; --ink:#1E1A1B; --ink-soft:#4A4143;
+  --bone:#F4EFE7; --bone-2:#ECE4D6; --panel:#FBF7F0; --line:#D8C8B8;
+  --brass:#A9831F; --brass-soft:#C7A24A; --alert:#B23A0E; --ok:#2E5E3A;
+  --shadow:0 1px 0 rgba(86,14,22,.06), 0 14px 30px -18px rgba(30,26,27,.45);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:"DM Sans",-apple-system,sans-serif;
+  color:var(--ink); background-color:var(--bone);
+  background-image:
+    linear-gradient(rgba(122,22,32,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(122,22,32,.035) 1px, transparent 1px),
+    radial-gradient(circle at 18% -10%, rgba(169,131,31,.10), transparent 42%);
+  background-size:26px 26px, 26px 26px, 100% 100%;
+  line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 18px 70px}
+.masthead{background:var(--oxblood-deep);color:#F6ECE0;position:relative;overflow:hidden;border-bottom:3px solid var(--brass)}
+.masthead::after{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(135deg, rgba(255,255,255,.03) 0 2px, transparent 2px 9px);pointer-events:none}
+.mast-inner{max-width:1080px;margin:0 auto;padding:26px 18px 20px;position:relative;z-index:1}
+.mast-code{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.18em;color:var(--brass);text-transform:uppercase;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.mast-title{font-family:"Oswald",sans-serif;font-weight:700;letter-spacing:.04em;font-size:clamp(30px,6vw,52px);line-height:.98;margin:8px 0 2px;text-transform:uppercase}
+.mast-title b{color:var(--brass)}
+.mast-sub{font-size:13.5px;color:#E7D8C7;max-width:660px}
+.mast-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center}
+.savehint{font-family:"Space Mono",monospace;font-size:10.5px;letter-spacing:.1em;color:#C9B8A6;text-transform:uppercase;margin-left:auto}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.chip{background:rgba(255,255,255,.07);border:1px solid rgba(169,131,31,.45);border-radius:3px;padding:7px 12px;min-width:118px}
+.chip .k{font-family:"Space Mono",monospace;font-size:9.5px;letter-spacing:.16em;color:var(--brass);text-transform:uppercase}
+.chip .v{font-family:"Oswald",sans-serif;font-size:18px;font-weight:600;color:#F6ECE0;line-height:1.1}
+.chip select{font-family:"Oswald",sans-serif;font-size:17px;font-weight:600;background:transparent;color:#F6ECE0;border:none;border-bottom:1px dotted var(--brass);outline:none;cursor:pointer}
+.chip select option{color:#1E1A1B}
+.tabs{position:sticky;top:0;z-index:20;background:var(--bone);display:flex;gap:2px;flex-wrap:wrap;border-bottom:2px solid var(--line);max-width:1080px;margin:0 auto;padding:0 18px}
+.tab{appearance:none;border:none;background:transparent;cursor:pointer;font-family:"Oswald",sans-serif;font-weight:500;letter-spacing:.06em;text-transform:uppercase;font-size:13px;color:var(--ink-soft);padding:14px 12px 11px;border-bottom:3px solid transparent;margin-bottom:-2px;position:relative;transition:color .18s}
+.tab:hover{color:var(--oxblood)}
+.tab.active{color:var(--oxblood);border-bottom-color:var(--brass)}
+.tab .num{font-family:"Space Mono",monospace;font-size:10px;color:var(--brass);margin-right:5px}
+.tab-badge{display:none;background:var(--alert);color:#fff;font-family:"Space Mono",monospace;font-size:10px;font-weight:700;border-radius:10px;padding:1px 7px;margin-left:6px;vertical-align:middle}
+.tab-badge.show{display:inline-block;animation:pulse 1.8s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(178,58,14,.55)}50%{box-shadow:0 0 0 6px rgba(178,58,14,0)}}
+.panel{display:none;padding-top:26px}
+.panel.active{display:block;animation:rise .4s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.section{margin:0 0 26px}
+.sec-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;border-bottom:1px solid var(--line);padding-bottom:7px;flex-wrap:wrap}
+.sec-idx{font-family:"Space Mono",monospace;font-size:12px;color:var(--brass);font-weight:700}
+.sec-title{font-family:"Oswald",sans-serif;font-weight:600;letter-spacing:.05em;text-transform:uppercase;font-size:18px;color:var(--oxblood)}
+.sec-note{font-size:12.5px;color:var(--ink-soft);margin-left:auto;font-style:italic;text-align:right;max-width:55%}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:5px;box-shadow:var(--shadow);padding:16px 18px}
+.card+.card{margin-top:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:720px){.grid2,.grid3{grid-template-columns:1fr}}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:5px;background:var(--panel);box-shadow:var(--shadow)}
+table.tbl{border-collapse:collapse;width:100%;font-size:13px;min-width:520px}
+table.tbl.wide{min-width:960px}
+.tbl th{background:var(--oxblood);color:#F6ECE0;font-family:"Oswald",sans-serif;font-weight:500;letter-spacing:.03em;text-transform:uppercase;font-size:11.5px;padding:9px 8px;text-align:center;position:sticky;top:0}
+.tbl td{padding:7px 8px;border-bottom:1px solid #EADFCF;text-align:center;vertical-align:middle}
+.tbl tr:nth-child(even) td{background:rgba(122,22,32,.025)}
+.tbl td.l{text-align:left}
+.tbl td.grouphdr{background:var(--oxblood-deep)!important;color:#F6ECE0;font-family:"Oswald",sans-serif;text-transform:uppercase;letter-spacing:.04em;font-weight:600;text-align:left;font-size:12px}
+.tbl tfoot td,.tbl .total td{background:var(--oxblood)!important;color:#F6ECE0;font-weight:700}
+.tbl input,.tbl select{font-family:inherit;font-size:12.5px;border:1px solid transparent;background:rgba(0,0,0,.02);border-radius:3px;padding:4px 5px;width:100%;text-align:center;color:var(--ink);outline:none}
+.tbl input:focus,.tbl select:focus{border-color:var(--brass);background:#fff;box-shadow:0 0 0 2px rgba(169,131,31,.18)}
+.num-in{max-width:50px}
+label.fld{display:block;font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:4px}
+input.txt,select.sel,textarea.txt{font-family:inherit;font-size:13.5px;border:1px solid var(--line);background:#fff;border-radius:4px;padding:8px 10px;width:100%;color:var(--ink);outline:none}
+input.txt:focus,select.sel:focus,textarea.txt:focus{border-color:var(--brass);box-shadow:0 0 0 3px rgba(169,131,31,.16)}
+textarea.txt{resize:vertical;min-height:38px}
+.btn{appearance:none;cursor:pointer;font-family:"Oswald",sans-serif;font-weight:500;letter-spacing:.05em;text-transform:uppercase;font-size:12.5px;border:1px solid var(--brass);background:var(--oxblood);color:#F6ECE0;padding:9px 16px;border-radius:4px;transition:transform .12s, background .15s}
+.btn:hover{background:var(--oxblood-deep);transform:translateY(-1px)}
+.btn.ghost{background:transparent;color:#F6ECE0;border-color:rgba(246,236,224,.4)}
+.btn.ghost:hover{background:rgba(255,255,255,.08)}
+.btn.sm{padding:6px 11px;font-size:11px}
+.prog-wrap{display:flex;align-items:center;gap:14px;margin:4px 0 18px;flex-wrap:wrap}
+.prog{flex:1;height:14px;min-width:140px;background:#E4D8C6;border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.prog .bar{height:100%;width:0;background:linear-gradient(90deg,var(--oxblood),var(--brass));transition:width .5s ease;border-radius:20px}
+.prog-lbl{font-family:"Space Mono",monospace;font-size:12px;color:var(--oxblood);font-weight:700;white-space:nowrap}
+.rodada{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.bloco{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;padding:11px 14px;border:1px solid var(--line);border-radius:5px;background:var(--panel);margin-bottom:8px;transition:background .2s}
+.bloco.done{background:#EFF4EC;border-color:#CBD9C2}
+.bloco .idx{font-family:"Oswald",sans-serif;font-weight:700;font-size:20px;color:var(--brass);text-align:center}
+.bloco .mat{font-family:"Oswald",sans-serif;font-weight:600;font-size:14.5px;text-transform:uppercase;letter-spacing:.02em;color:var(--oxblood)}
+.bloco.done .mat{text-decoration:line-through;color:var(--ink-soft)}
+.bloco .foco{font-size:12.5px;color:var(--ink-soft)}
+.bloco .dur{font-family:"Space Mono",monospace;font-size:12px;color:var(--ink);background:var(--bone-2);padding:2px 8px;border-radius:3px;margin-left:8px;white-space:nowrap}
+.chk{appearance:none;width:24px;height:24px;border:2px solid var(--oxblood);border-radius:5px;cursor:pointer;position:relative;background:#fff;flex:none}
+.chk:checked{background:var(--oxblood)}
+.chk:checked::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:700}
+.fase{border-left:4px solid var(--brass);padding:12px 14px;background:var(--panel);border-radius:0 5px 5px 0;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.fase h4{font-family:"Oswald",sans-serif;text-transform:uppercase;letter-spacing:.03em;color:var(--oxblood);margin:0 0 4px;font-size:14.5px}
+.fase .when{font-family:"Space Mono",monospace;font-size:10.5px;color:var(--brass);text-transform:uppercase;letter-spacing:.06em}
+.fase p{margin:6px 0 0;font-size:13px;color:var(--ink-soft)}
+.metodo{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.step{background:var(--bone-2);border:1px solid var(--line);border-radius:4px;padding:8px 12px;font-size:13px;display:flex;gap:8px;align-items:center}
+.step b{font-family:"Space Mono",monospace;color:var(--brass)}
+.arrow{color:var(--brass);font-weight:700}
+/* Ciclo editor */
+.cb-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:7px 10px;border:1px solid var(--line);border-radius:5px;background:var(--panel);margin-bottom:7px}
+.cb-idx{font-family:"Oswald",sans-serif;font-weight:700;color:var(--brass);width:22px;text-align:center}
+.cb-in{font-family:inherit;font-size:13px;border:1px solid var(--line);border-radius:4px;padding:6px 8px;background:#fff;color:var(--ink);outline:none}
+.cb-in:focus{border-color:var(--brass);box-shadow:0 0 0 2px rgba(169,131,31,.16)}
+.cb-in.mat{flex:1 1 150px}
+.cb-in.dur{flex:0 0 72px;text-align:center}
+.cb-in.foco{flex:2 1 190px}
+.cb-actions{display:flex;gap:4px;margin-left:auto}
+.ic{appearance:none;border:1px solid var(--line);background:var(--bone-2);border-radius:4px;cursor:pointer;font-size:14px;width:30px;height:30px;color:var(--ink);line-height:1}
+.ic:hover{background:var(--bone)}
+.ic.del{color:var(--alert);border-color:#e0c4bc}
+.edit-hint{font-size:12.5px;color:var(--ink-soft);margin:-4px 2px 12px}
+.bl-time{display:flex;align-items:center;gap:8px;margin-top:6px}
+.bl-bar{flex:1;max-width:160px;height:6px;background:#E4D8C6;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.bl-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--oxblood),var(--brass));border-radius:8px}
+.bl-t{font-family:"Space Mono",monospace;font-size:10.5px;color:var(--ink-soft)}
+/* Timer & sessões */
+.timer-card{text-align:center}
+.timer-disp{font-family:"Space Mono",monospace;font-weight:700;font-size:clamp(40px,12vw,64px);letter-spacing:.04em;color:var(--oxblood);line-height:1.1}
+.timer-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.btn.ghost-d{background:transparent;color:var(--oxblood);border-color:var(--line)}
+.btn.ghost-d:hover{background:var(--bone-2)}
+.pm-row{display:flex;align-items:center;gap:10px;padding:5px 0}
+.pm-nome{flex:0 0 150px;font-size:12.5px;color:var(--ink)}
+.pm-bar{flex:1;height:10px;background:#E4D8C6;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.pm-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--oxblood),var(--brass));border-radius:10px}
+.pm-h{font-family:"Space Mono",monospace;font-size:11px;color:var(--oxblood);font-weight:700;width:54px;text-align:right}
+@media(max-width:520px){.pm-nome{flex-basis:108px}}
+.sess-card{border:1px solid var(--line);border-left:4px solid var(--brass);border-radius:0 5px 5px 0;background:var(--panel);padding:11px 14px;margin-bottom:9px;box-shadow:var(--shadow)}
+.sess-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.sess-mat{font-family:"Oswald",sans-serif;text-transform:uppercase;font-weight:600;color:var(--oxblood);font-size:14.5px}
+.sess-right{display:flex;align-items:center;gap:10px}
+.sess-h{font-family:"Space Mono",monospace;font-weight:700;color:var(--ok);font-size:13px}
+.sess-data{font-family:"Space Mono",monospace;font-size:11px;color:var(--ink-soft)}
+.sess-cont{font-size:13.5px;margin-top:5px}
+.sess-obs{font-size:12.5px;margin-top:4px;color:var(--ink-soft)}
+.sess-obs .lbl{font-family:"Space Mono",monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--brass)}
+/* Edital accordion */
+.edital-sum{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.leg{display:flex;gap:14px;flex-wrap:wrap;font-family:"Space Mono",monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin:12px 2px}
+.leg span b{font-weight:700}
+.acc{border:1px solid var(--line);border-radius:5px;background:var(--panel);margin-bottom:8px;overflow:hidden;box-shadow:var(--shadow)}
+.acc-head{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;user-select:none}
+.acc-head:hover{background:rgba(122,22,32,.03)}
+.acc-tag{font-family:"Space Mono",monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px;border:1px solid var(--line);color:var(--ink-soft);white-space:nowrap}
+.acc-tag.esp{color:#fff;background:var(--oxblood);border-color:var(--oxblood)}
+.acc-tag.red{color:#fff;background:var(--alert);border-color:var(--alert)}
+.acc-name{font-family:"Oswald",sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.02em;font-size:14.5px;color:var(--oxblood);flex:1}
+.acc-mini{display:flex;align-items:center;gap:8px}
+.acc-bar{width:90px;height:8px;background:#E4D8C6;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.acc-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--oxblood),var(--brass));border-radius:10px;transition:width .4s}
+.acc-cnt{font-family:"Space Mono",monospace;font-size:11px;color:var(--ink-soft);white-space:nowrap}
+.acc-chev{transition:transform .2s;color:var(--brass);font-size:13px}
+.acc.open .acc-chev{transform:rotate(90deg)}
+.acc-body{display:none;border-top:1px solid var(--line);padding:6px 14px 12px}
+.acc.open .acc-body{display:block}
+.topic{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px dashed #E7DCCC}
+.topic:last-child{border-bottom:none}
+.topic .tname{flex:1;font-size:13px}
+.topic select{font-family:inherit;font-size:11.5px;border:1px solid var(--line);border-radius:4px;padding:4px 6px;background:#fff;min-width:110px;outline:none;cursor:pointer}
+.topic select:focus{border-color:var(--brass);box-shadow:0 0 0 2px rgba(169,131,31,.16)}
+/* Banco */
+.due-summary{font-family:"Oswald",sans-serif;text-transform:uppercase;letter-spacing:.03em;font-size:14px;color:var(--alert);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.due-summary.none{color:var(--ok)}
+.erro-card{border:1px solid var(--line);border-left:4px solid var(--line);border-radius:0 5px 5px 0;background:var(--panel);padding:13px 15px;margin-bottom:10px;box-shadow:var(--shadow)}
+.erro-card.due{border-left-color:var(--alert);background:#FCF1EC}
+.erro-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.erro-mat{font-family:"Oswald",sans-serif;text-transform:uppercase;color:var(--oxblood);font-weight:600;font-size:15px}
+.erro-meta{font-family:"Space Mono",monospace;font-size:10.5px;color:var(--ink-soft);letter-spacing:.04em}
+.erro-body{margin:6px 0 10px;font-size:13.5px}
+.erro-body .lbl{font-family:"Space Mono",monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--brass)}
+.revs{display:flex;gap:8px;flex-wrap:wrap}
+.rev{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:20px;padding:4px 11px;font-size:12px;background:var(--bone)}
+.rev.duenow{border-color:var(--alert);background:#fff;color:var(--alert);font-weight:600}
+.rev.ok{border-color:#cbd9c2;background:#EFF4EC;color:var(--ok)}
+.rev .when{font-family:"Space Mono",monospace;font-size:11px}
+.rev input{width:16px;height:16px;accent-color:var(--oxblood);cursor:pointer}
+.del{appearance:none;border:none;background:none;color:#b99;cursor:pointer;font-size:18px;line-height:1;padding:0 2px}
+.del:hover{color:var(--alert)}
+.empty{text-align:center;color:var(--ink-soft);font-style:italic;padding:24px;border:1px dashed var(--line);border-radius:5px}
+.addgrid{display:grid;grid-template-columns:130px 1fr 1fr;gap:10px}
+.addgrid .full{grid-column:1 / -1}
+@media(max-width:680px){.addgrid{grid-template-columns:1fr}}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+@media(max-width:680px){.kpis{grid-template-columns:1fr}}
+.kpi{background:var(--oxblood);color:#F6ECE0;border-radius:5px;padding:12px 14px;border:1px solid var(--brass)}
+.kpi .k{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--brass)}
+.kpi .v{font-family:"Oswald",sans-serif;font-size:26px;font-weight:700;line-height:1.1}
+.foot{font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:30px;font-family:"Space Mono",monospace;letter-spacing:.06em}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="mast-inner">
+    <div class="mast-code"><span>PREP-OP // SOLDADO PMDF</span><span>ALVO: 2027 · 80 QUESTÕES + REDAÇÃO</span></div>
+    <h1 class="mast-title">Planner <b>PMDF</b></h1>
+    <p class="mast-sub">Rotina de ~15h/semana com revisão espaçada. Os Conhecimentos Específicos valem 40 das 80 questões — metade da prova. A redação é eliminatória (mín. 10 de 20).</p>
+    <div class="chips">
+      <div class="chip"><div class="k">Meta semanal</div><div class="v">~15h</div></div>
+      <div class="chip"><div class="k">Prova objetiva</div><div class="v">80 questões</div></div>
+      <div class="chip"><div class="k">Aprovação</div><div class="v">2027</div></div>
+      <div class="chip"><div class="k">Fase atual</div><div class="v"><select id="faseSel"><option>Base</option><option>Aprofundamento</option><option>Reta final</option></select></div></div>
+    </div>
+    <div class="mast-tools">
+      <button class="btn ghost sm" id="btnExport">Exportar dados</button>
+      <button class="btn ghost sm" id="btnImport">Importar</button>
+      <input type="file" id="fileImport" accept="application/json" style="display:none">
+      <span class="savehint" id="saveHint">salvo automaticamente</span>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-tab="painel"><span class="num">01</span>Painel</button>
+  <button class="tab" data-tab="edital"><span class="num">02</span>Edital</button>
+  <button class="tab" data-tab="ciclo"><span class="num">03</span>Ciclo</button>
+  <button class="tab" data-tab="horas"><span class="num">04</span>Sessões</button>
+  <button class="tab" data-tab="banco"><span class="num">05</span>Banco de Erros<span class="tab-badge" id="dueBadge">0</span></button>
+  <button class="tab" data-tab="taf"><span class="num">06</span>TAF</button>
+</nav>
+
+<div class="wrap">
+
+  <!-- PAINEL -->
+  <section class="panel active" id="painel">
+    <div class="section">
+      <div class="sec-head"><span class="sec-idx">01.1</span><span class="sec-title">Matérias e pesos</span><span class="sec-note">Conforme o edital verticalizado. Específicas = metade da prova.</span></div>
+      <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th class="l">Matéria</th><th>Questões</th><th>Peso</th><th>Status</th></tr></thead>
+          <tbody id="materiaBody"></tbody>
+        </table>
+      </div>
+      <div class="card" style="margin-top:12px"><p style="margin:0;font-size:13px;color:var(--ink-soft)">O edital não divide os 40 pontos das Específicas por matéria — na prática, <b>Constitucional/DH, Penal e Processual Penal</b> costumam pesar mais. A <b>Redação</b> elimina quem tirar menos de 10: treine desde já, não deixe pra reta final.</p></div>
+    </div>
+
+    <div class="section">
+      <div class="sec-head"><span class="sec-idx">01.2</span><span class="sec-title">Plano por fases — rumo a 2027</span></div>
+      <div class="grid3">
+        <div class="fase"><h4>1 · Base</h4><div class="when">agora → ~6 meses</div><p>Passar uma vez por todo o edital: teoria + questões, sem pressa. Comece por Português, Constitucional/DH e Legislação PMDF.</p></div>
+        <div class="fase"><h4>2 · Aprofundamento</h4><div class="when">meio do ciclo</div><p>Peso pesado em questões. Atacar os pontos fracos do Banco de Erros. Simulados por matéria e redações semanais.</p></div>
+        <div class="fase"><h4>3 · Reta final</h4><div class="when">~3 meses antes</div><p>Revisão intensa, lei seca, simulados completos cronometrados e ramp-up do treino para o TAF.</p></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-head"><span class="sec-idx">01.3</span><span class="sec-title">Método de cada sessão</span></div>
+      <div class="card">
+        <div class="metodo">
+          <span class="step"><b>1</b> Teoria com recordação ativa</span><span class="arrow">→</span>
+          <span class="step"><b>2</b> Questões da matéria</span><span class="arrow">→</span>
+          <span class="step"><b>3</b> Anotar erros no Banco</span><span class="arrow">→</span>
+          <span class="step"><b>4</b> Revisão espaçada (1 · 7 · 30 dias)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EDITAL -->
+  <section class="panel" id="edital">
+    <div class="section">
+      <div class="sec-head"><span class="sec-idx">02.1</span><span class="sec-title">Edital verticalizado</span><span class="sec-note">Marque o que já estudou. Toque numa matéria para abrir.</span></div>
+      <div class="card edital-sum">
+        <div><div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--brass)">Tópicos estudados</div><div style="font-family:Oswald,sans-serif;font-size:30px;font-weight:700;color:var(--oxblood)" id="edTot">0 / 0</div></div>
+        <div class="prog"><div class="bar" id="edBar"></div></div>
+        <div style="font-family:Oswald,sans-serif;font-size:26px;font-weight:700;color:var(--brass)" id="edPct">0%</div>
+      </div>
+      <div class="leg">
+        <span><b style="color:#9b8f80">—</b> não estudei</span>
+        <span><b style="color:var(--brass)">Estudando</b></span>
+        <span><b style="color:var(--ok)">Estudei ✓</b> conta como coberto</span>
+        <span><b style="color:var(--alert)">Revisar</b></span>
+      </div>
+      <div id="editalList"></div>
+    </div>
+  </section>
+
+  <!-- CICLO -->
+  <section class="panel" id="ciclo">
+    <div class="section">
+      <div class="sec-head"><span class="sec-idx">03.1</span><span class="sec-title">Ciclo de estudos</span><span class="sec-note" id="cicloResumo">—</span></div>
+      <div id="cicloTopo"></div>
+      <div id="cicloList"></div>
+      <datalist id="matList"></datalist>
+    </div>
+    <div class="section">
+      <div class="grid2">
+        <div class="card"><h4 style="font-family:Oswald;text-transform:uppercase;color:var(--oxblood);margin:0 0 6px;font-size:14px">Como ler o ciclo</h4><p style="margin:0;font-size:13px;color:var(--ink-soft)">As Específicas ocupam ~metade dos blocos, espelhando o peso (40 de 80). Rode na ordem; terminou, recomeça. Perdeu um dia? Continua de onde parou. Quer outro arranjo? Toque em <b>✎ Editar ciclo</b> e monte do seu jeito.</p></div>
+        <div class="card"><h4 style="font-family:Oswald;text-transform:uppercase;color:var(--oxblood);margin:0 0 6px;font-size:14px">Flex da semana</h4><p style="margin:0 0 4px;font-size:13px;color:var(--ink-soft)"><b>Só 10h?</b> Corte Inglês e Criminologia e encurte os blocos de 1h30.</p><p style="margin:0;font-size:13px;color:var(--ink-soft)"><b>Sobrou 20h?</b> Dobre questões de Constitucional/DH e Penal + 1 simulado.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SESSÕES -->
+  <section class="panel" id="horas">
+    <div class="section">
+      <div class="sec-head"><span class="sec-idx">04.1</span><span class="sec-title">Registrar sessão</span><span class="sec-note">Informe os minutos estudados e a matéria.</span></div>
+      <div class="card" id="sessForm">
+        <div class="addgrid">
+          <div><label class="fld">Data</label><input type="date" id="sData" class="txt"></div>
+          <div><label class="fld">Matéria</label><select id="sMateria" class="sel"></select></div>
+          <div><label class="fld">Minutos estudados</label><input type="number" id="sMin" class="txt" inputmode="numeric" min="1" step="5" placeholder="ex.: 90"></div>
+          <div class="full"><label class="fld">Conteúdo estudado</label><input type="text" id="sConteudo" class="txt" placeholder="o que você estudou nesta sessão"></div>
+          <div class="full"><label class="fld">Observação</label><textarea id="sObs" class="txt" placeholder="dúvidas, o que revisar, como foi..."></textarea></div>
+          <div class="full"><button class="btn" id="btnSalvarSessao">+ Salvar sessão</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-head"><span class="sec-idx">04.2</span><span class="sec-title">Resumo</span></div>
+      <div class="kpis">
+        <div class="kpi"><div class="k">Total registrado</div><div class="v" id="kpiTotal">0h</div></div>
+        <div class="kpi"><div class="k">Esta semana</div><div class="v" id="kpiSemana">0h</div></div>
+        <div class="kpi"><div class="k">Sessões</div><div class="v" id="kpiSessoes">0</div></div>
+      </div>
+      <div class="card" style="margin-top:12px"><div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--brass);margin-bottom:8px">Horas por matéria</div><div id="porMateria"></div></div>
+    </div>
+
+    <div class="section">
+      <div class="sec-head"><span class="sec-idx">04.3</span><span class="sec-title">Histórico de sessões</span></div>
+      <div id="sessList"></div>
+    </div>
+  </section>
+
+  <!-- BANCO -->
+  <section class="panel" id="banco">
+    <div class="section">
+      <div class="sec-head"><span class="sec-idx">05.1</span><span class="sec-title">Banco de erros</span><span class="sec-note">As datas de revisão se calculam sozinhas.</span></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="addgrid">
+          <div><label class="fld">Data</label><input type="date" id="eData" class="txt"></div>
+          <div><label class="fld">Matéria</label><select id="eMateria" class="sel"></select></div>
+          <div><label class="fld">Banca / Fonte</label><input type="text" id="eBanca" class="txt" placeholder="banca, simulado..."></div>
+          <div class="full"><label class="fld">Tópico</label><input type="text" id="eTopico" class="txt" placeholder="Direitos fundamentais, atos administrativos..."></div>
+          <div class="full"><label class="fld">Resumo da questão</label><input type="text" id="eResumo" class="txt"></div>
+          <div class="full"><label class="fld">Por que errei</label><textarea id="ePorque" class="txt"></textarea></div>
+          <div class="full"><button class="btn" id="btnAddErro">+ Adicionar erro</button></div>
+        </div>
+      </div>
+      <div class="due-summary none" id="dueSummary"></div>
+      <div id="bancoList"></div>
+    </div>
+  </section>
+
+  <!-- TAF -->
+  <section class="panel" id="taf">
+    <div class="section">
+      <div class="sec-head"><span class="sec-idx">06.1</span><span class="sec-title">Índices de referência</span><span class="sec-note">Índices mudam por edital — preencha os mínimos oficiais.</span></div>
+      <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th class="l">Prova</th><th>Índice mín. (edital)</th><th>Meu resultado</th><th>Status</th></tr></thead>
+          <tbody id="tafIdxBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="section">
+      <div class="sec-head"><span class="sec-idx">06.2</span><span class="sec-title">Registro semanal de treino</span></div>
+      <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>Semana</th><th>Corrida</th><th>Flexão</th><th>Abdominal</th><th>Barra / Obs.</th></tr></thead>
+          <tbody id="tafLogBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">PLANNER PMDF · SOLDADO · uso pessoal · seus dados ficam salvos neste navegador (use “Exportar” para backup)</div>
+</div>
+
+<script>
+const KEY="pmdf_planner_state_v2";
+const STATUS=["PENDENTE","INICIADO","EM DIA","REVISAR"];
+const ST_COLOR={PENDENTE:"#9b8f80","INICIADO":"#A9831F","EM DIA":"#2E5E3A","REVISAR":"#B23A0E"};
+
+const PAINEL=[
+  {group:"Conhecimentos Gerais — 40 questões", rows:[
+    ["Língua Portuguesa","10","Alta"],
+    ["Legislação aplicada à PMDF","10","Alta"],
+    ["Matemática e Raciocínio Lógico","9","Alta"],
+    ["Atualidades (DF e RIDE)","7","Média"],
+    ["Língua Inglesa","4","Baixa"]]},
+  {group:"Conhecimentos Específicos — 40 questões (metade da prova)", rows:[
+    ["Constitucional e Direitos Humanos","—","Altíssima"],
+    ["Direito Penal","—","Alta"],
+    ["Direito Processual Penal","—","Alta"],
+    ["Direito Administrativo","—","Média"],
+    ["Direito Penal Militar","—","Média"],
+    ["Direito Processual Penal Militar","—","Média"],
+    ["Criminologia","—","Média"]]},
+  {group:"Redação — eliminatória (mín. 10 de 20 pts)", rows:[
+    ["Redação","20 pts","Eliminatória"]]}
+];
+const MATERIAS_BANCO=["Língua Portuguesa","Língua Inglesa","Matemática e RLM","Atualidades (DF/RIDE)","Legislação PMDF","Constitucional e DH","Direito Administrativo","Direito Penal","Direito Processual Penal","Direito Penal Militar","Direito Proc. Penal Militar","Criminologia","Redação"];
+
+const CICLO=[
+["Língua Portuguesa","1h30","Interpretação + ortografia/acentuação"],
+["Constitucional e DH","1h30","Direitos e garantias / teoria dos DH"],
+["Direito Penal","1h30","Teoria do crime / fato típico"],
+["Legislação PMDF","1h30","Estatuto (7.289/84) + Lei Orgânica do DF"],
+["Matemática e RLM","1h30","Estruturas lógicas / lógica de argumentação"],
+["Dir. Proc. Penal","1h","Inquérito / prisões e cautelares"],
+["Dir. Administrativo","1h","Poderes / atos administrativos"],
+["Dir. Penal Militar","1h","Crimes militares / aplicação da lei"],
+["Língua Portuguesa","1h","Concordância, crase, correspondência oficial"],
+["Constitucional e DH","1h","Organização do Estado / Adm. Pública"],
+["Criminologia","1h","Conceito, escolas, vitimologia"],
+["Dir. Proc. Penal Militar","1h","IPM / processo penal militar"],
+["Atualidades (DF/RIDE)","1h","Realidade do DF + conexão com o Brasil"],
+["Língua Inglesa","1h","Leitura + tempos verbais e modais"],
+["Redação","1h","1 redação treinada + autocorreção"]];
+
+const HCOLS=[["Port","Língua Portuguesa"],["Ing","Língua Inglesa"],["Mat/RL","Matemática e RLM"],["Atu","Atualidades (DF/RIDE)"],["LegPM","Legislação PMDF"],["Con/DH","Constitucional e DH"],["Adm","Dir. Administrativo"],["Pen","Direito Penal"],["ProcP","Dir. Proc. Penal"],["PMil","Dir. Penal Militar"],["PrMil","Dir. Proc. Penal Militar"],["Crim","Criminologia"]];
+
+const EDITAL=[
+{n:"Língua Portuguesa",area:"Gerais",topics:["Compreensão e intelecção de textos","Tipologia textual","Ortografia","Acentuação gráfica","Emprego do sinal indicativo de crase","Formação, classe e emprego de palavras","Sintaxe da oração e do período","Pontuação","Concordância nominal e verbal","Colocação pronominal","Regência nominal e verbal","Equivalência e transformação de estruturas","Paralelismo sintático","Sinonímia e antonímia","Correspondência oficial (Manual da Presidência)"]},
+{n:"Língua Inglesa",area:"Gerais",topics:["Compreensão de textos escritos","Itens gramaticais para compreensão","Pronomes (pessoais, oblíquos, demonstrativos, possessivos, reflexivos)","Artigos","Substantivos","Adjetivos","Advérbios","Verbos","Tempos e aspectos verbais (Present/Past/Future · Simple/Continuous/Perfect)","Verbos modais (can, could, should, may, might, must...)","Preposições · prefixos e sufixos","Voz passiva","Orações subordinadas, conjunções e relative clauses","Discurso direto e indireto","Condicionais (zero, 1st, 2nd, 3rd, mixed)","Phrasal verbs · verb patterns · question tags"]},
+{n:"Matemática e Raciocínio Lógico",area:"Gerais",topics:["Estruturas lógicas (proposições, conectivos, equivalências, implicações)","Lógica de argumentação (analogias, inferências, deduções, conclusões)","Diagramas lógicos","Problemas de contagem (PFC, permutação, arranjo, combinação)","Probabilidades","Razão, proporção e regra de três · porcentagem","Sistemas de medidas (comprimento, área, volume)","Áreas","Volumes"]},
+{n:"Atualidades (DF e RIDE)",area:"Gerais",topics:["Realidade do DF e da RIDE (étnica, social, histórica, geográfica, cultural, política, econômica)","Conexão do DF com o Brasil"]},
+{n:"Legislação aplicada à PMDF",area:"Gerais",topics:["Lei Orgânica do Distrito Federal","Lei nº 6.450/1977 — organização básica da PMDF","Lei nº 7.289/1984 — Estatuto dos Policiais-Militares","Lei nº 12.086/2009 — militares da PMDF e CBMDF","Decreto nº 88.777/1983 — regulamento (R-200)","Decreto nº 10.443/2020 — organização básica da PMDF","Decreto nº 41.167/2020 — regulamenta art. 48, II, da Lei 6.450"]},
+{n:"Constitucional e Direitos Humanos",area:"Específicas",topics:["Constituição: conceito, estrutura, elementos e classificação","Poder Constituinte","Princípios fundamentais da República","Direitos e deveres individuais e coletivos","Direitos sociais","Nacionalidade","Direitos políticos e partidos políticos","Remédios constitucionais (HC, MS, MI, HD, ação popular)","Organização do Estado (entes, competências, intervenção)","Administração Pública (servidores e militares)","Organização dos Poderes (Legislativo, Executivo, Judiciário)","Funções essenciais à Justiça","Defesa do Estado e das instituições democráticas","Teoria geral dos Direitos Humanos","Evolução histórica e gerações de DH","Incorporação de tratados de DH ao direito interno","Declaração Universal dos Direitos Humanos (1948)","Convenção contra a Tortura (1984)","Convenção Americana — Pacto de São José (Dec. 678/1992)","Bloco de constitucionalidade e controle de convencionalidade","CNDH — Lei nº 12.986/2014","Lei nº 13.060/2014","Código de Conduta da ONU (Resolução 34/169 de 1979)","Sistema Interamericano de Direitos Humanos"]},
+{n:"Direito Administrativo",area:"Específicas",topics:["Regime jurídico-administrativo e princípios","Poderes e deveres da Administração (poder de polícia, uso/abuso)","Organização administrativa (direta/indireta, descentralização)","Atos administrativos (requisitos, atributos, espécies, extinção)","Responsabilidade civil do Estado","Improbidade administrativa (Lei 8.429/1992)","Processo administrativo (Lei 9.784/1999)","Licitações e contratos (Lei 14.133/2021)","Serviços públicos","Agentes públicos","Controle da Administração Pública","Bens públicos","Lei de Acesso à Informação (Lei 12.527/2011)"]},
+{n:"Direito Penal",area:"Específicas",topics:["Princípios do Direito Penal","Lei penal (interpretação, analogia, tempo e espaço, extraterritorialidade)","Teoria geral do crime (conceito, sujeitos, classificação)","Fato típico (conduta, resultado, causalidade, tipicidade)","Crime doloso, culposo e preterdoloso","Erro de tipo e de proibição · descriminantes putativas","Iter criminis · consumação e tentativa","Desistência, arrependimento, crime impossível","Ilicitude e causas de exclusão · excesso","Culpabilidade (imputabilidade, exigibilidade)","Concurso de pessoas","Crime e contravenção","Das penas (privativas, restritivas, multa, aplicação)","Concurso de crimes · sursis · livramento · efeitos","Extinção da punibilidade","Crimes contra a pessoa","Crimes contra o patrimônio","Crimes contra a dignidade sexual","Crimes contra incolumidade, paz e fé pública","Crimes contra a Administração Pública e o Estado Democrático","Lei de Abuso de Autoridade (13.869/2019)","Lei de Racismo (7.716/1989)","ECA — ato infracional e crimes (8.069/1990)","Crimes Hediondos (8.072/1990)","Crimes de Trânsito (9.503/1997)","Lei de Tortura (9.455/1997)","Crimes Ambientais (9.605/1998)","Estatuto do Desarmamento (10.826/2003)","Lei de Drogas (11.343/2006)"]},
+{n:"Direito Processual Penal",area:"Específicas",topics:["Noções introdutórias (princípios, sistemas, fontes, lei no tempo/espaço)","Inquérito policial","Termo circunstanciado de ocorrência","Acordo de não persecução penal","Controle externo da atividade policial","Ação penal e ação civil ex delicto","Jurisdição e competência criminal","Provas (teoria geral, meios de prova e de obtenção)","Medidas cautelares pessoais (prisões e diversas da prisão)","Liberdade provisória","Medidas cautelares reais (assecuratórias)","Procedimento comum (ordinário, sumário, sumaríssimo)","Nulidades","Lei de Prisão Temporária (7.960/1989)","Juizados Especiais Criminais (9.099/1995)","Interceptação Telefônica (9.296/1996)","Lei Maria da Penha (11.340/2006)","Organizações Criminosas (12.850/2013)","Identificação Criminal (12.037/2009)"]},
+{n:"Direito Penal Militar",area:"Específicas",topics:["Aplicação da lei penal militar","Crime","Imputabilidade penal","Concurso de agentes","Penas principais","Aplicação da pena","Suspensão condicional da pena","Livramento condicional","Penas acessórias","Efeitos da condenação","Medidas de segurança","Ação penal","Extinção da punibilidade","Crimes militares em tempo de paz","Crimes propriamente militares","Crimes impropriamente militares"]},
+{n:"Direito Processual Penal Militar",area:"Específicas",topics:["Lei de Processo Penal Militar e sua aplicação","Polícia judiciária militar","Inquérito policial militar","Ação penal militar e seu exercício","Processo","Denúncia","Jurisdição e competência","Questões prejudiciais e incidentes","Medidas preventivas e assecuratórias","Atos probatórios","Processo ordinário","Processos especiais","Nulidades e recursos"]},
+{n:"Criminologia",area:"Específicas",topics:["Conceito e características","Objeto","Método e finalidade","Funções","Classificação","História da criminologia (Clássica, Positiva, Política Criminal, Terza Scuola)","Estatística criminal · cifra negra/dourada · prognóstico","Sociologia criminal","Vitimologia","Prevenção criminal","Fatores sociais de criminalidade","Instâncias de controle","Crimes do colarinho branco"]},
+{n:"Redação",area:"Redação",topics:["Atendimento e desenvolvimento do tema","Coesão e coerência (intra e entre parágrafos)","Atendimento à estrutura textual proposta","Informatividade e argumentação","Modalidade gramatical (pontuação, grafia, concordância, regência)","Treino: redação completa e cronometrada"]}
+];
+
+const TAF_EVENTS=["Corrida 12 min (m)","Flexão de braço (reps)","Abdominal 1 min (reps)","Barra fixa / suspensão (reps)","Impulsão horizontal (m)"];
+const WEEKS_H=20, WEEKS_T=16;
+const EOPTS=[["","—"],["Estudando","Estudando"],["Estudei","Estudei ✓"],["Revisar","Revisar"]];
+const ECOLOR={"":"#9b8f80","Estudando":"#A9831F","Estudei":"#2E5E3A","Revisar":"#B23A0E"};
+
+const MEM={};
+const Store={
+  async get(k){
+    try{ if(window.storage&&window.storage.get){ const r=await window.storage.get(k); return r?r.value:null; } }catch(e){}
+    try{ const v=localStorage.getItem(k); if(v!==null) return v; }catch(e){}
+    return (k in MEM)?MEM[k]:null;
+  },
+  async set(k,v){
+    try{ if(window.storage&&window.storage.set){ await window.storage.set(k,v); return; } }catch(e){}
+    try{ localStorage.setItem(k,v); return; }catch(e){}
+    MEM[k]=v;
+  }
+};
+
+function defaultState(){
+  const tafLog={}; for(let w=1;w<=WEEKS_T;w++){tafLog[w]={corrida:"",flexao:"",abd:"",obs:""};}
+  const ms={}; PAINEL.forEach(g=>g.rows.forEach(r=>ms[r[0]]="PENDENTE"));
+  return {faseAtual:"Base", materiaStatus:ms, editalStatus:{}, cicloBlocos:defaultCiclo(), rodada:1,
+    sessoes:[],
+    erros:[], tafIdx:TAF_EVENTS.map(()=>({min:"",result:"",status:"Abaixo"})), tafLog};
+}
+let state=defaultState();
+let saveT;
+function save(){clearTimeout(saveT);const h=document.getElementById("saveHint");h.textContent="salvando…";saveT=setTimeout(async()=>{await Store.set(KEY,JSON.stringify(state));h.textContent="salvo automaticamente";},350);}
+
+function parseISO(s){if(!s)return null;const p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2]);}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
+function fmtBR(d){if(!d)return"—";const p=n=>String(n).padStart(2,"0");return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear();}
+function today0(){const t=new Date();t.setHours(0,0,0,0);return t;}
+function numBR(n){const r=Math.round(n*10)/10;return (Number.isInteger(r)?r.toString():r.toFixed(1)).replace(".",",");}
+function covered(s){return s==="Estudei"||s==="Revisar";}
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function defaultCiclo(){return CICLO.map(b=>({mat:b[0],dur:b[1],foco:b[2],done:false,feitoMin:0}));}
+function durMin(s){s=String(s||"").toLowerCase();let h=0,m=0;const mh=s.match(/(\d+)\s*h/);if(mh)h=+mh[1];const mm=s.match(/h\s*(\d{1,2})/);if(mm)m=+mm[1];else{const mi=s.match(/(\d+)\s*min/);if(mi)m=+mi[1];else if(!mh){const o=s.match(/(\d+)/);if(o)h=+o[1];}}return h*60+m;}
+function totalMin(b){return b.reduce((a,x)=>a+durMin(x.dur),0);}
+function fmtDur(min){min=Math.round(min);const h=Math.floor(min/60),m=min%60;if(h===0)return m+"min";return h+"h"+(m?(m<10?"0"+m:""+m):"");}
+
+function renderPainel(){
+  const tb=document.getElementById("materiaBody");tb.innerHTML="";
+  PAINEL.forEach(g=>{
+    const gr=document.createElement("tr");gr.innerHTML=`<td class="grouphdr" colspan="4">${g.group}</td>`;tb.appendChild(gr);
+    g.rows.forEach(r=>{
+      const m=r[0];const st=state.materiaStatus[m]||"PENDENTE";
+      const opts=STATUS.map(s=>`<option ${st===s?"selected":""}>${s}</option>`).join("");
+      const tr=document.createElement("tr");
+      tr.innerHTML=`<td class="l">${m}</td><td>${r[1]}</td><td>${r[2]}</td>
+        <td><select class="sel" data-mat="${m}" style="font-size:11px;color:${ST_COLOR[st]};font-weight:700">${opts}</select></td>`;
+      tb.appendChild(tr);
+    });
+  });
+  document.getElementById("faseSel").value=state.faseAtual;
+}
+function renderEdital(){
+  const wrap=document.getElementById("editalList");wrap.innerHTML="";
+  EDITAL.forEach((sub,si)=>{
+    const tag = sub.area==="Específicas"?'<span class="acc-tag esp">Específica</span>':(sub.area==="Redação"?'<span class="acc-tag red">Redação</span>':'<span class="acc-tag">Geral</span>');
+    let cov=0;
+    const rows=sub.topics.map((t,ti)=>{
+      const id="s"+si+"t"+ti; const v=state.editalStatus[id]||""; if(covered(v))cov++;
+      const opts=EOPTS.map(o=>`<option value="${o[0]}" ${v===o[0]?"selected":""}>${o[1]}</option>`).join("");
+      return `<div class="topic"><span class="tname">${t}</span><select data-ed="${id}" style="color:${ECOLOR[v]};font-weight:${v?600:400}">${opts}</select></div>`;
+    }).join("");
+    const pct=sub.topics.length?Math.round(cov/sub.topics.length*100):0;
+    const acc=document.createElement("div");acc.className="acc";
+    acc.innerHTML=`<div class="acc-head" data-acc="${si}">${tag}<span class="acc-name">${sub.n}</span>
+      <span class="acc-mini"><span class="acc-bar"><i id="bar-s${si}" style="width:${pct}%"></i></span><span class="acc-cnt" id="cnt-s${si}">${cov}/${sub.topics.length}</span></span>
+      <span class="acc-chev">▶</span></div><div class="acc-body">${rows}</div>`;
+    wrap.appendChild(acc);
+  });
+  recalcEdital();
+}
+function recalcEdital(){
+  let totT=0,totC=0;
+  EDITAL.forEach((sub,si)=>{
+    let cov=0; sub.topics.forEach((t,ti)=>{ if(covered(state.editalStatus["s"+si+"t"+ti]||"")) cov++; });
+    totT+=sub.topics.length; totC+=cov;
+    const pct=sub.topics.length?Math.round(cov/sub.topics.length*100):0;
+    const bar=document.getElementById("bar-s"+si); if(bar)bar.style.width=pct+"%";
+    const cnt=document.getElementById("cnt-s"+si); if(cnt)cnt.textContent=cov+"/"+sub.topics.length;
+  });
+  const op=totT?Math.round(totC/totT*100):0;
+  document.getElementById("edTot").textContent=totC+" / "+totT;
+  document.getElementById("edPct").textContent=op+"%";
+  document.getElementById("edBar").style.width=op+"%";
+}
+let cicloEditing=false;
+function renderCiclo(){
+  const topo=document.getElementById("cicloTopo");
+  const list=document.getElementById("cicloList");
+  const blocos=state.cicloBlocos;
+  const done=blocos.filter(b=>b.done).length;
+  const pct=blocos.length?Math.round(done/blocos.length*100):0;
+  const resumo=document.getElementById("cicloResumo");
+  if(resumo) resumo.textContent=blocos.length+" blocos · ~"+fmtDur(totalMin(blocos))+" por ciclo";
+  if(cicloEditing){
+    topo.innerHTML=`<div class="prog-wrap"><button class="btn sm" data-act="add">+ Adicionar bloco</button><button class="btn sm" data-act="restaurar">↺ Restaurar padrão</button><button class="btn" data-act="concluir">✓ Concluir edição</button></div><p class="edit-hint">Digite a matéria (ou escolha uma sugestão), a duração (ex.: 1h30) e o foco. Use ↑ ↓ para reordenar e × para remover.</p>`;
+    list.innerHTML=blocos.map((b,i)=>`<div class="cb-row"><span class="cb-idx">${i+1}</span>`+
+      `<input class="cb-in mat" data-cb="${i}" data-f="mat" list="matList" value="${esc(b.mat)}" placeholder="Matéria">`+
+      `<input class="cb-in dur" data-cb="${i}" data-f="dur" value="${esc(b.dur)}" placeholder="1h30">`+
+      `<input class="cb-in foco" data-cb="${i}" data-f="foco" value="${esc(b.foco)}" placeholder="Foco (opcional)">`+
+      `<span class="cb-actions"><button class="ic" data-mv="up" data-i="${i}" title="Subir">↑</button><button class="ic" data-mv="down" data-i="${i}" title="Descer">↓</button><button class="ic del" data-rm="${i}" title="Remover">×</button></span></div>`).join("");
+  }else{
+    const alvo=blocos.reduce((a,b)=>a+durMin(b.dur),0),feito=blocos.reduce((a,b)=>a+Math.min(b.feitoMin||0,durMin(b.dur)),0),pctT=alvo?Math.round(feito/alvo*100):0;
+    topo.innerHTML=`<div class="prog-wrap"><div class="prog"><div class="bar" style="width:${pctT}%"></div></div><span class="prog-lbl">${fmtDur(feito)} / ${fmtDur(alvo)}</span><span class="rodada">${done}/${blocos.length} blocos · Rodada ${state.rodada}</span><button class="btn sm" data-act="editar">✎ Editar ciclo</button><button class="btn sm" data-act="reiniciar">Reiniciar ciclo</button></div>`;
+    list.innerHTML=blocos.length?blocos.map((b,i)=>{const tgt=durMin(b.dur),f=Math.min(b.feitoMin||0,tgt),bp=tgt?Math.round(f/tgt*100):0;return `<div class="bloco${b.done?" done":""}"><div class="idx">${i+1}</div><div><span class="mat">${esc(b.mat)}</span><span class="dur">${esc(b.dur)}</span><div class="foco">${esc(b.foco)}</div><div class="bl-time"><span class="bl-bar"><i style="width:${bp}%"></i></span><span class="bl-t">${fmtDur(b.feitoMin||0)} / ${esc(b.dur)}</span></div></div><input type="checkbox" class="chk" data-ciclo="${i}" ${b.done?"checked":""}></div>`;}).join(""):`<div class="empty">Ciclo vazio. Toque em “✎ Editar ciclo” para montar o seu.</div>`;
+  }
+}
+const SESS_MATERIAS=HCOLS.map(c=>c[1]).concat(["Redação","Revisão geral","Simulado","Outro"]);
+function startOfWeek(){const d=today0();const day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);return d;}
+function norm(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();}
+function creditCiclo(materia,min){
+  const b=state.cicloBlocos, blocks=b.filter(x=>norm(x.mat)===norm(materia)).length; let left=min;
+  for(let i=0;i<b.length&&left>0;i++){ if(norm(b[i].mat)!==norm(materia))continue; const tgt=durMin(b[i].dur),cur=b[i].feitoMin||0,room=Math.max(0,tgt-cur); if(room<=0)continue; const add=Math.min(left,room); b[i].feitoMin=cur+add; left-=add; if(b[i].feitoMin>=tgt)b[i].done=true; }
+  return {blocks, credited:min-left};
+}
+function renderSessoes(){
+  const sel=document.getElementById("sMateria");
+  if(sel && !sel.options.length){SESS_MATERIAS.forEach(m=>{const o=document.createElement("option");o.textContent=m;sel.appendChild(o);});}
+  const totalM=state.sessoes.reduce((a,s)=>a+(+s.min||0),0);
+  const t0=startOfWeek();
+  const semanaM=state.sessoes.reduce((a,s)=>{const d=parseISO(s.data);return (d&&d>=t0)?a+(+s.min||0):a;},0);
+  document.getElementById("kpiTotal").textContent=fmtDur(totalM);
+  document.getElementById("kpiSemana").textContent=fmtDur(semanaM);
+  document.getElementById("kpiSessoes").textContent=state.sessoes.length;
+  const por={}; state.sessoes.forEach(s=>{por[s.materia]=(por[s.materia]||0)+(+s.min||0);});
+  const arr=Object.keys(por).filter(k=>por[k]>0).sort((a,b)=>por[b]-por[a]);
+  const max=arr.length?por[arr[0]]:0;
+  document.getElementById("porMateria").innerHTML=arr.length?arr.map(k=>`<div class="pm-row"><span class="pm-nome">${esc(k)}</span><span class="pm-bar"><i style="width:${max?Math.round(por[k]/max*100):0}%"></i></span><span class="pm-h">${fmtDur(por[k])}</span></div>`).join(""):`<div class="empty" style="padding:14px">Nenhuma sessão ainda.</div>`;
+  const sorted=[...state.sessoes].sort((a,b)=>(b.data||"").localeCompare(a.data||"")||(b.id>a.id?1:-1));
+  document.getElementById("sessList").innerHTML=sorted.length?sorted.map(s=>`<div class="sess-card"><div class="sess-top"><span class="sess-mat">${esc(s.materia||"—")}</span><span class="sess-right"><span class="sess-h">${fmtDur(+s.min||0)}</span><span class="sess-data">${fmtBR(parseISO(s.data))}</span><button class="del" data-dels="${s.id}" title="Excluir">×</button></span></div>${s.conteudo?`<div class="sess-cont">${esc(s.conteudo)}</div>`:""}${s.obs?`<div class="sess-obs"><span class="lbl">Obs</span> ${esc(s.obs)}</div>`:""}</div>`).join(""):`<div class="empty">Nenhuma sessão registrada ainda. Preencha os minutos acima e salve.</div>`;
+}
+function renderBanco(){
+  const sel=document.getElementById("eMateria");
+  if(!sel.options.length){MATERIAS_BANCO.forEach(m=>{const o=document.createElement("option");o.textContent=m;sel.appendChild(o);});}
+  const list=document.getElementById("bancoList");list.innerHTML="";
+  const t0=today0();let due=0;
+  if(!state.erros.length){list.innerHTML=`<div class="empty">Nenhum erro registrado ainda. Cada questão que você errar entra aqui — e vira revisão automática.</div>`;}
+  [...state.erros].sort((a,b)=>(b.data||"").localeCompare(a.data||"")).forEach(e=>{
+    const base=parseISO(e.data);
+    const cps=[[1,e.d1,"d1"],[7,e.d7,"d7"],[30,e.d30,"d30"]].map(([n,done,key])=>{
+      const dt=base?addDays(base,n):null;
+      const isDue=dt&&!done&&dt.getTime()<=t0.getTime(); if(isDue)due++;
+      return{n,done,key,dt,isDue};
+    });
+    const cardDue=cps.some(c=>c.isDue);
+    const card=document.createElement("div");card.className="erro-card"+(cardDue?" due":"");
+    const revs=cps.map(c=>`<label class="rev ${c.done?"ok":(c.isDue?"duenow":"")}"><input type="checkbox" data-erro="${e.id}" data-ck="${c.key}" ${c.done?"checked":""}> +${c.n}d <span class="when">${fmtBR(c.dt)}</span></label>`).join("");
+    card.innerHTML=`<div class="erro-top"><span class="erro-mat">${e.materia||"—"}</span>
+      <span style="display:flex;gap:10px;align-items:center"><span class="erro-meta">${e.banca||""} · ${fmtBR(base)}</span><button class="del" data-del="${e.id}" title="Excluir">×</button></span></div>
+      <div class="erro-body">${e.topico?`<span class="lbl">Tópico</span> ${e.topico}<br>`:""}${e.resumo?`<span class="lbl">Questão</span> ${e.resumo}<br>`:""}${e.porque?`<span class="lbl">Por que errei</span> ${e.porque}`:""}</div>
+      <div class="revs">${revs}</div>`;
+    list.appendChild(card);
+  });
+  const ds=document.getElementById("dueSummary");
+  if(due>0){ds.className="due-summary";ds.textContent="● "+due+(due===1?" revisão pendente hoje":" revisões pendentes hoje");}
+  else{ds.className="due-summary none";ds.textContent=state.erros.length?"✓ Nenhuma revisão pendente hoje. Em dia.":"";}
+  const badge=document.getElementById("dueBadge");
+  if(due>0){badge.textContent=due;badge.classList.add("show");}else{badge.classList.remove("show");}
+}
+function renderTAF(){
+  const ib=document.getElementById("tafIdxBody");ib.innerHTML="";
+  TAF_EVENTS.forEach((p,i)=>{
+    const d=state.tafIdx[i];
+    const opts=["Abaixo","Atingiu","Superou"].map(s=>`<option ${d.status===s?"selected":""}>${s}</option>`).join("");
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td class="l">${p}</td><td><input data-taf="min" data-r="${i}" value="${d.min||""}"></td>
+      <td><input data-taf="result" data-r="${i}" value="${d.result||""}"></td>
+      <td><select class="sel" data-taf="status" data-r="${i}" style="font-size:11px">${opts}</select></td>`;
+    ib.appendChild(tr);
+  });
+  const lb=document.getElementById("tafLogBody");lb.innerHTML="";
+  for(let w=1;w<=WEEKS_T;w++){
+    const r=state.tafLog[w];const tr=document.createElement("tr");
+    tr.innerHTML=`<td>${w}</td>
+      <td><input data-tl="${w}" data-f="corrida" value="${r.corrida||""}"></td>
+      <td><input data-tl="${w}" data-f="flexao" value="${r.flexao||""}"></td>
+      <td><input data-tl="${w}" data-f="abd" value="${r.abd||""}"></td>
+      <td><input class="l" style="text-align:left" data-tl="${w}" data-f="obs" value="${r.obs||""}"></td>`;
+    lb.appendChild(tr);
+  }
+}
+function renderAll(){renderPainel();renderEdital();renderCiclo();renderSessoes();renderBanco();renderTAF();}
+
+function wireTabs(){
+  document.getElementById("tabs").addEventListener("click",e=>{
+    const t=e.target.closest(".tab");if(!t)return;
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");document.getElementById(t.dataset.tab).classList.add("active");
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+}
+document.getElementById("faseSel").addEventListener("change",e=>{state.faseAtual=e.target.value;save();});
+document.getElementById("painel").addEventListener("change",e=>{
+  const s=e.target.closest("[data-mat]");if(s){state.materiaStatus[s.dataset.mat]=s.value;s.style.color=ST_COLOR[s.value];save();}
+});
+document.getElementById("edital").addEventListener("click",e=>{
+  const h=e.target.closest("[data-acc]");
+  if(h && !e.target.closest("select")) h.parentElement.classList.toggle("open");
+});
+document.getElementById("edital").addEventListener("change",e=>{
+  const s=e.target.closest("[data-ed]");if(!s)return;
+  state.editalStatus[s.dataset.ed]=s.value;
+  s.style.color=ECOLOR[s.value];s.style.fontWeight=s.value?600:400;
+  save();recalcEdital();
+});
+document.getElementById("ciclo").addEventListener("click",e=>{
+  const act=e.target.closest("[data-act]");
+  if(act){
+    const a=act.dataset.act;
+    if(a==="editar"){cicloEditing=true;renderCiclo();}
+    else if(a==="concluir"){cicloEditing=false;renderCiclo();}
+    else if(a==="add"){state.cicloBlocos.push({mat:"",dur:"1h",foco:"",done:false});save();renderCiclo();}
+    else if(a==="restaurar"){if(confirm("Restaurar o ciclo sugerido? Isso substitui os blocos atuais.")){state.cicloBlocos=defaultCiclo();save();renderCiclo();}}
+    else if(a==="reiniciar"){const any=state.cicloBlocos.some(b=>b.done||(b.feitoMin||0)>0);if(any&&!confirm("Reiniciar o ciclo? Os blocos voltam a 'não concluído', o tempo acumulado zera e a rodada avança."))return;if(any)state.rodada++;state.cicloBlocos.forEach(b=>{b.done=false;b.feitoMin=0;});save();renderCiclo();}
+    return;
+  }
+  const mv=e.target.closest("[data-mv]");
+  if(mv){const i=+mv.dataset.i,j=mv.dataset.mv==="up"?i-1:i+1,b=state.cicloBlocos;if(j>=0&&j<b.length){const t=b[i];b[i]=b[j];b[j]=t;save();renderCiclo();}return;}
+  const rm=e.target.closest("[data-rm]");
+  if(rm){state.cicloBlocos.splice(+rm.dataset.rm,1);save();renderCiclo();return;}
+});
+document.getElementById("ciclo").addEventListener("change",e=>{
+  const c=e.target.closest("[data-ciclo]");if(c){state.cicloBlocos[+c.dataset.ciclo].done=c.checked;save();renderCiclo();}
+});
+document.getElementById("ciclo").addEventListener("input",e=>{
+  const f=e.target.closest("[data-cb]");if(f){state.cicloBlocos[+f.dataset.cb][f.dataset.f]=f.value;save();const r=document.getElementById("cicloResumo");if(r)r.textContent=state.cicloBlocos.length+" blocos · ~"+fmtDur(totalMin(state.cicloBlocos))+" por ciclo";}
+});
+document.getElementById("horas").addEventListener("click",e=>{
+  if(e.target.id==="btnSalvarSessao"){
+    const min=parseInt(String(document.getElementById("sMin").value).replace(/[^\d]/g,""),10);
+    if(!min||min<=0){alert("Informe quantos minutos você estudou.");return;}
+    const materia=document.getElementById("sMateria").value;
+    const data=document.getElementById("sData").value||new Date().toISOString().slice(0,10);
+    state.sessoes.push({id:Date.now()+""+Math.floor(Math.random()*999),data,materia,conteudo:document.getElementById("sConteudo").value,min,obs:document.getElementById("sObs").value});
+    document.getElementById("sConteudo").value="";document.getElementById("sObs").value="";document.getElementById("sMin").value="";
+    save();
+    if(confirm("Contar "+min+" min de "+materia+" no ciclo de estudos?")){
+      const r=creditCiclo(materia,min);
+      if(r.blocks===0)alert("Não há bloco de \""+materia+"\" no ciclo atual — a sessão foi registrada, mas não entrou no ciclo.");
+      else if(r.credited===0)alert("Os blocos de \""+materia+"\" já estão completos neste ciclo. Reinicie o ciclo para uma nova rodada.");
+      save();renderCiclo();
+    }
+    renderSessoes();return;
+  }
+  const del=e.target.closest("[data-dels]");
+  if(del&&confirm("Excluir esta sessão?")){state.sessoes=state.sessoes.filter(x=>x.id!==del.dataset.dels);save();renderSessoes();}
+});
+document.getElementById("taf").addEventListener("input",e=>{
+  const a=e.target.closest("[data-taf]");if(a){state.tafIdx[+a.dataset.r][a.dataset.taf]=a.value;save();return;}
+  const l=e.target.closest("[data-tl]");if(l){state.tafLog[l.dataset.tl][l.dataset.f]=l.value;save();}
+});
+document.getElementById("taf").addEventListener("change",e=>{
+  const a=e.target.closest('[data-taf="status"]');if(a){state.tafIdx[+a.dataset.r].status=a.value;save();}
+});
+document.getElementById("btnAddErro").addEventListener("click",()=>{
+  const data=document.getElementById("eData").value;
+  if(!data){alert("Informe a data do erro.");return;}
+  state.erros.push({id:Date.now()+""+Math.floor(Math.random()*999),data,materia:document.getElementById("eMateria").value,
+    banca:document.getElementById("eBanca").value,topico:document.getElementById("eTopico").value,
+    resumo:document.getElementById("eResumo").value,porque:document.getElementById("ePorque").value,d1:false,d7:false,d30:false});
+  ["eBanca","eTopico","eResumo","ePorque"].forEach(id=>document.getElementById(id).value="");
+  save();renderBanco();
+});
+document.getElementById("banco").addEventListener("change",e=>{
+  const ck=e.target.closest("[data-ck]");
+  if(ck){const er=state.erros.find(x=>x.id===ck.dataset.erro);if(er){er[ck.dataset.ck]=ck.checked;save();renderBanco();}}
+});
+document.getElementById("banco").addEventListener("click",e=>{
+  const d=e.target.closest("[data-del]");
+  if(d&&confirm("Excluir este registro de erro?")){state.erros=state.erros.filter(x=>x.id!==d.dataset.del);save();renderBanco();}
+});
+document.getElementById("btnExport").addEventListener("click",()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="Planner_PMDF_backup.json";a.click();URL.revokeObjectURL(a.href);
+});
+document.getElementById("btnImport").addEventListener("click",()=>document.getElementById("fileImport").click());
+document.getElementById("fileImport").addEventListener("change",e=>{
+  const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{state=Object.assign(defaultState(),JSON.parse(r.result));save();renderAll();alert("Dados importados.");}catch(err){alert("Arquivo inválido.");}};
+  r.readAsText(f);
+});
+
+function buildMatList(){const dl=document.getElementById("matList");if(!dl)return;const names=HCOLS.map(c=>c[1]).concat(["Redação","Revisão geral","Simulado"]);dl.innerHTML=names.map(n=>`<option value="${esc(n)}"></option>`).join("");}
+(async function(){
+  const raw=await Store.get(KEY);
+  if(raw){try{
+    const parsed=JSON.parse(raw);
+    state=Object.assign(defaultState(),parsed);
+    if(parsed&&!parsed.cicloBlocos&&Array.isArray(parsed.ciclo)){state.cicloBlocos=defaultCiclo().map((b,i)=>({...b,done:!!parsed.ciclo[i]}));}
+    if(Array.isArray(state.cicloBlocos))state.cicloBlocos.forEach(b=>{if(typeof b.feitoMin!=="number")b.feitoMin=0;});
+    if(Array.isArray(state.sessoes))state.sessoes.forEach(s=>{if(typeof s.min!=="number"&&s.horas!=null)s.min=Math.round(s.horas*60);});
+    delete state.ciclo;delete state.timer;
+  }catch(e){}}
+  buildMatList();
+  const todayISO=new Date().toISOString().slice(0,10);
+  if(!document.getElementById("eData").value)document.getElementById("eData").value=todayISO;
+  if(document.getElementById("sData")&&!document.getElementById("sData").value)document.getElementById("sData").value=todayISO;
+  renderAll();wireTabs();
+})();
+</script><script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}</script>
+</body>
+</html>
